@@ -9,7 +9,8 @@ def update_figure(data):
     axes[0].plot(x, y, 'r-')
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().pack()
-
+    
+sg.theme('DarkTeal6')
 table_content = []
 layout = [
     [sg.Table(headings = ['Observation', 'Result'],
