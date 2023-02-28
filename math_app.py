@@ -43,4 +43,5 @@ while True:
             window['-INPUT-'].update('')
             update_figure(table_content)
 
+
 window.close()
