@@ -1,63 +1,56 @@
-import PySimpleGUI as sg
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import sympy as sp
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
-def update_figure(data):
-    axes = fig.axes
-    x = [i[0] for i in data]
-    y = [int(i[1]) for i in data]
-    axes[0].plot(x, y, 'r-')
-    figure_canvas_agg.draw()
-    figure_canvas_agg.get_tk_widget().pack()
+symbol_x = sp.Symbol('x')
+symbol_y = sp.Symbol('y')
 
-def input_check(indut_data):
-    for symb in new_value:
-        if not symb in avalaible_symbols:
-            return False
-        else:
-            return True
-            
-sg.theme('DarkTeal6')
-table_content = []
-avalaible_symbols = ('x', ' ', 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '-', '+', '*',
-                     '^', 'exp', '(', ')', 'sqrt')
-x = 0
-layout = [
-    [sg.Table(headings = ['Observation', 'Result'],
-              values = table_content,
-              expand_x = True,
-              hide_vertical_scroll=True,
-              key = '-TABLE-')],
-    [sg.Input(key = '-INPUT-', expand_x = True), sg.Button('Submit')],
-    [sg.Canvas(key = '-CANVAS-')]
 
-]
+def get_vector(a, b):
+    return np.arange(a, b + 0.1, 0.1)
 
-window = sg.Window('Graph App', layout, finalize=True)
 
-fig = Figure(figsize = (5,4))
-fig.add_subplot(111).plot([],[])
-figure_canvas_agg = FigureCanvasTkAgg(fig, window['-CANVAS-'].TKCanvas)
-figure_canvas_agg.draw()
-figure_canvas_agg.get_tk_widget().pack()
+def plot_2d_function(function, a, b):
+    # Create the sympy function f(x)
+    f_x = sp.sympify(function)
 
-while True:
-    event, values = window.read()
-    if event == sg.WIN_CLOSED:
-        break
-    if event == 'Submit':
-        new_value = values["-INPUT-"]
-        if input_check(new_value):
-            for elem in new_value:
-                if elem == 'x':
-                    pass
-                elif elem.isdigit():
-                    pass
-                elif elem == (' ', '(', ')', '+', '*', '-'):
-                    pass
-            table_content.append([len(table_content) +1 , float(new_value)])
-            window['-TABLE-'].update(table_content)
-            window['-INPUT-'].update('')
-            update_figure(table_content)
+    # Create domain and image
+    domain_x = get_vector(a, b)
+    image = [f_x.subs(symbol_x, value) for value in domain_x]
 
-window.close()
+    # Plot the 2D function graph
+    fig = plt.figure(figsize=(10, 10))
+    plt.plot(domain_x, image)
+    plt.grid(True)
+    plt.show()
+
+
+def plot_3d_function(function, a, b):
+    # Create sympy function f(x, y)
+    f_xy = sp.lambdify((symbol_x, symbol_y), sp.sympify(function))
+
+    # Create domains and image
+    domain_x = get_vector(a, b)
+    domain_y = get_vector(a, b)
+    domain_x, domain_y = np.meshgrid(domain_x, domain_y)
+    image = f_xy(domain_x, domain_y)
+
+    # Plot the 3D function graph
+    fig = plt.figure(figsize=(10, 10))
+    ax = plt.axes(projection='3d')
+    ax.plot_surface(domain_x, domain_y, image,
+                    rstride=1, cstride=1, cmap='viridis')
+    plt.show()
+
+
+function = input('>> Enter the function: ')
+a_value = float(input('>> Enter the [a, ] value: '))
+b_value = float(input('>> Enter the [, b] value: '))
+if "x" and not "y" in function:
+    plot_2d_function(function, a_value, b_value)
+elif "x" and "y" in function:
+    plot_3d_function(function, a_value, b_value)
+
+else:
+    print("You must enter a function in terms of x and/or y")
